@@ -6,6 +6,12 @@ export type Visibility = 'public' | 'private';
 /** Icon shown in an experience entry's circle. */
 export type WorkplaceIcon = 'scissors' | 'lotus';
 
+export interface Verifier {
+  name: string;
+  /** Their role at the workplace, in plain words: "Salon owner", "Manager". */
+  title: string;
+}
+
 export interface Experience {
   id: string;
   employer: string;
@@ -16,8 +22,8 @@ export interface Experience {
   end: string | null;
   /** Average customer rating earned at this workplace. */
   rating: number;
-  /** Whether the employer has confirmed this job on Tirelo. */
-  verified: boolean;
+  /** The person at the workplace who confirmed this job on Tirelo; absent if not yet confirmed. */
+  verifiedBy?: Verifier;
   icon: WorkplaceIcon;
   /** 'deep' = filled maroon circle, 'soft' = light pink circle (as in the approved design). */
   tone: 'deep' | 'soft';
@@ -31,6 +37,10 @@ export interface Worker {
   /** YYYY-MM */
   memberSince: string;
   visibility: Visibility;
+  /** Checked against a government ID. */
+  identityVerified: boolean;
+  /** Public link to this passport. */
+  passportUrl: string;
   about: string;
   location: string;
   /** Customer ratings, keyed by star. Every rating on Tirelo comes with a review. */

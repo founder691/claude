@@ -1,14 +1,7 @@
 import type { Visibility, Worker } from '../types';
 import { formatMonthYear } from '../lib/format';
-import { Calendar, Globe, Lock } from './Icons';
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+import { Avatar } from './Avatar';
+import { Calendar, Globe, Lock, VerifiedTick } from './Icons';
 
 export function ProfileHeader({
   worker,
@@ -23,13 +16,7 @@ export function ProfileHeader({
   return (
     <section className="profile" aria-label="Profile">
       <div className="profile__top">
-        {worker.photoUrl ? (
-          <img className="avatar" src={worker.photoUrl} alt={worker.name} />
-        ) : (
-          <div className="avatar avatar--monogram" role="img" aria-label={worker.name}>
-            {initials(worker.name)}
-          </div>
-        )}
+        <Avatar worker={worker} size={116} />
         <div className="profile__status">
           <button
             type="button"
@@ -50,6 +37,12 @@ export function ProfileHeader({
         <Calendar />
         Member since {formatMonthYear(worker.memberSince)}
       </p>
+      {worker.identityVerified && (
+        <p className="verified-line">
+          <VerifiedTick />
+          Identity verified
+        </p>
+      )}
     </section>
   );
 }

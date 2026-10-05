@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { Experience } from '../types';
 import { sampleWorker } from '../data/sampleWorker';
-import { ratingSummary, sortExperience } from './metrics';
+import { ratingSummary, sortExperience, verifiedJobCount } from './metrics';
 import { formatMonthYear, formatRange } from './format';
 
 const exp = (id: string, start: string, end: string | null): Experience => ({
-  id, employer: id, role: 'r', start, end, rating: 5, verified: true, icon: 'lotus', tone: 'soft',
+  id, employer: id, role: 'r', start, end, rating: 5, verifiedBy: { name: 'n', title: 't' }, icon: 'lotus', tone: 'soft',
 });
 
 describe('ratingSummary', () => {
@@ -38,5 +38,11 @@ describe('format', () => {
     expect(formatMonthYear('2025-03')).toBe('Mar 2025');
     expect(formatRange('2023-01', null)).toBe('Jan 2023 – Present');
     expect(formatRange('2019-06', '2022-12')).toBe('Jun 2019 – Dec 2022');
+  });
+});
+
+describe('verifiedJobCount', () => {
+  it('counts only jobs with a verifier', () => {
+    expect(verifiedJobCount([exp('a', '2020-01', null), { ...exp('b', '2018-01', '2019-01'), verifiedBy: undefined }])).toBe(1);
   });
 });

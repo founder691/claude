@@ -16,3 +16,6 @@ export const ratingSummary = (ratings: Worker['ratings']) => {
 /** Current job first, then most recent. */
 export const sortExperience = (items: Experience[]) =>
   [...items].sort((a, b) => (a.end === null ? -1 : b.end === null ? 1 : b.start.localeCompare(a.start)));
+
+/** Number of jobs someone at the workplace has confirmed. */
+export const verifiedJobCount = (items: Experience[]) => items.filter((e) => e.verifiedBy).length;
