@@ -1,60 +1,37 @@
-import { useEffect, useRef, useState } from 'react';
-import type { Worker } from './types';
-import { currentEngagement } from './lib/metrics';
-import { Passport } from './components/Passport';
-import { CurrentRole } from './components/CurrentRole';
-import { WorkHistory } from './components/WorkHistory';
-import { Reputation } from './components/Reputation';
-import { Recognition } from './components/Recognition';
-import { PrivateIncome } from './components/PrivateIncome';
-import { ShareSheet } from './components/ShareSheet';
-import { Share } from './components/Icons';
+import { useState } from 'react';
+import type { Visibility, Worker } from './types';
+import { AppBar } from './components/AppBar';
+import { ProfileHeader } from './components/ProfileHeader';
+import { RatingRow } from './components/RatingRow';
+import { Details } from './components/Details';
+import { ExperienceList } from './components/ExperienceList';
+import { TireloLogo } from './components/TireloLogo';
 
-export function App({ worker, now }: { worker: Worker; now: Date }) {
-  const [sharing, setSharing] = useState(false);
-  const [showStickyShare, setShowStickyShare] = useState(false);
-  const shareRef = useRef<HTMLButtonElement>(null);
-  const current = currentEngagement(worker.engagements);
-
-  // Once the passport's Share button scrolls away, keep a Share button within thumb reach.
-  useEffect(() => {
-    const el = shareRef.current;
-    if (!el || !('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver(([entry]) => setShowStickyShare(!entry.isIntersecting));
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+export function App({ worker }: { worker: Worker }) {
+  const [visibility, setVisibility] = useState<Visibility>(worker.visibility);
 
   return (
-    <>
-      <main className="page">
-        <Passport ref={shareRef} worker={worker} now={now} onShare={() => setSharing(true)} />
+    <div className="screen">
+      <AppBar />
+      <main className="passport">
+        <ProfileHeader
+          worker={worker}
+          visibility={visibility}
+          onToggleVisibility={() => setVisibility((v) => (v === 'public' ? 'private' : 'public'))}
+        />
+        <RatingRow ratings={worker.ratings} />
 
-        <p className="explainer">
-          <strong>What is this?</strong> A Tirelo profile is {worker.firstName}’s own record of work. Each job is
-          confirmed by the employer or co-workers, and the profile stays with {worker.firstName} from job to job.
-        </p>
+        <section className="section" aria-labelledby="about-title">
+          <h2 id="about-title" className="section__title">About</h2>
+          <p className="about">{worker.about}</p>
+        </section>
 
-        {current && <CurrentRole role={current} now={now} />}
-        <WorkHistory engagements={worker.engagements} now={now} />
-        <Reputation ratings={worker.ratings} reviews={worker.reviews} />
-        <Recognition items={worker.recognitions} />
-        <PrivateIncome months={worker.earnings} />
-
-        <footer className="footer">
-          <span className="wordmark">Tirelo</span>
-          <span>Your work, confirmed. Yours to keep.</span>
-        </footer>
+        <Details worker={worker} />
+        <ExperienceList items={worker.experience} />
       </main>
-
-      <div className={showStickyShare ? 'sticky-share sticky-share--visible' : 'sticky-share'} aria-hidden={!showStickyShare}>
-        <button type="button" className="share-button" onClick={() => setSharing(true)} tabIndex={showStickyShare ? 0 : -1}>
-          <Share size={20} />
-          Share profile
-        </button>
-      </div>
-
-      <ShareSheet worker={worker} open={sharing} onClose={() => setSharing(false)} />
-    </>
+      <footer className="powered">
+        Powered by <TireloLogo height={30} />
+      </footer>
+    </div>
   );
 }
