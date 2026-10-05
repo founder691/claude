@@ -4,6 +4,8 @@ import type { Worker } from '../types';
 export const sampleWorker: Worker = {
   name: 'Sarah Thomas',
   profession: 'Hair Stylist',
+  // Cropped from the approved Service Passport design.
+  photoUrl: '/sarah-thomas.webp',
   memberSince: '2025-03',
   visibility: 'public',
   identityVerified: true,

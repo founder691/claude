@@ -175,7 +175,7 @@ button {
   color: var(--slate);
 }
 
-/* Plain-language proof: "✓ Identity verified", "✓ Verified by …" */
+/* Plain-language proof: "✓ Government ID verified", "✓ Verified by …" */
 .verified-line {
   display: flex;
   align-items: center;

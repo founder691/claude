@@ -15,7 +15,7 @@ npm run build      # typecheck + production build
 
 1. **App bar**: back, "Service Passport", settings.
 2. **Identity**: round photo, Public/Private pill, name, profession, "Member since",
-   "✓ Identity verified".
+   "✓ Government ID verified".
 3. **Reputation**: average rating (with how many ratings), review count, % positive.
 4. **Share my Passport**: a full-width button with one line on why ("Your passport goes with
    you…"). Once it scrolls away, the same button stays pinned to the bottom of the screen.
@@ -46,7 +46,7 @@ with no boxed cards. On wider screens the same phone-width column is centred.
 ### Additions to the reference
 
 - **Share my Passport** button and share sheet (see above).
-- **Plain-language verification**: "Identity verified" under the name, and who verified each
+- **Plain-language verification**: "Government ID verified" under the name, and who verified each
   job, instead of badges or technical labels.
 - A small star before each job's rating, so "· 4.8" reads as a rating.
 - The **Public** pill is a button that switches the passport between Public and Private.

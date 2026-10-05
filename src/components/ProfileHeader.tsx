@@ -40,7 +40,7 @@ export function ProfileHeader({
       {worker.identityVerified && (
         <p className="verified-line">
           <VerifiedTick />
-          Identity verified
+          Government ID verified
         </p>
       )}
     </section>
