@@ -1,8 +1,7 @@
 # Tirelo — worker profile prototype
 
-A responsive prototype of a **Tirelo worker profile**: a professional identity that belongs to the
-worker, not the employer, and travels with them from job to job. Every claim on the profile shows
-who vouches for it.
+A prototype of a **Tirelo work passport**: a worker's professional reputation and confirmed work
+history, owned by the worker and carried from job to job.
 
 ```bash
 npm install
@@ -11,77 +10,57 @@ npm test           # unit tests for metrics & formatting
 npm run build      # typecheck + production build
 ```
 
-## Product structure
+## Design
 
-The page answers three questions, in this order:
+The page answers one question: **"Who is this person professionally, and why should I trust
+their work?"** It is designed as a work *passport*, not a dashboard: one calm column,
+mobile-first, plain language, and details only when you ask for them.
 
-1. **Who is this, and can I trust it?** — Header with name, headline, city, languages, government-ID
-   check, and a shareable profile link. A stats strip summarises experience, rating, share of
-   history that is verified, and recognitions.
-2. **What have they done?** — *Current role* card (highlights, tenure, how it's verified) followed by a
-   *Verified work history* timeline. Each engagement carries a verification level:
+| # | Section | Shown upfront | Behind "show more" |
+|---|---|---|---|
+| 1 | **Passport** — who they are | Name, current job, city, languages, ID checked, two trust lines ("6 years of work, every job confirmed", "4.8 stars from 319 customers") | — |
+| 2 | **Working now** | Role, workplace, how long, one sentence, who confirmed it | Highlights, how it was confirmed |
+| 3 | **Work history** | One line per workplace (a promotion reads as "Barista → Shift Lead") | Each role's dates and description, who confirmed it and how |
+| 4 | **What people say** | Rating, three words people use most, one manager quote + one customer quote | All reviews |
+| 5 | **Awards & certificates** | Short list | — |
+| 6 | **Your income** — private | Clearly marked "Only you can see this"; the amount is hidden until tapped | Month by month |
+| 7 | **Share profile** | Large button in the passport; stays pinned to the bottom of the screen after scrolling | Share sheet: WhatsApp, copy link, and a reminder that income is never shared |
 
-   | Level | Meaning |
-   |---|---|
-   | Payroll verified | Matched against salary / UPI payout records (strongest) |
-   | Employer verified | Confirmed by an authorised employer account |
-   | Peer verified | Confirmed by 2+ verified co-workers (for gig / informal work) |
-   | Self-reported | Not yet verified |
+Directly under the passport, one sentence explains Tirelo to someone who has never heard of it.
 
-3. **What do people say?** — *Ratings & reviews* (score, distribution, most-mentioned traits,
-   filter by customers / managers / co-workers) and *Tips & recognition* (recent tips with
-   thank-you notes, awards, certifications, milestones).
-
-Plus an **Earnings summary** (6-month total, monthly average, tip share, month-over-month change,
-stacked base-pay/tips chart with a table view).
-
-### Privacy model
-
-The profile is worker-owned, so visibility is part of the product. The **My view / Employer view**
-toggle previews what a shared link shows:
-
-| Section | Worker | Employer (shared link) |
-|---|---|---|
-| Identity, history, reviews, recognitions | ✓ | ✓ |
-| Tips — notes | ✓ | ✓ |
-| Tips — amounts | ✓ | hidden |
-| Earnings | ✓ | hidden (worker can share a verified statement separately) |
+Verification is written in plain words ("Confirmed by Kaapi Collective · Matched with salary
+records") rather than labels or badges. Under the hood each job carries a source — payroll,
+employer, co-workers, or self-reported — and a workplace shows its weakest one.
 
 ## Technical approach
 
-- **Vite + React 19 + TypeScript**, no UI or chart libraries: plain CSS with design tokens and an
-  inline-SVG chart keep the bundle small and the prototype easy to restyle.
-- **Typed domain model** (`src/types.ts`) — `Worker`, `Engagement`, `Review`, `Tip`,
-  `Recognition`, `EarningsMonth`, `VerificationSource`. The sample data
-  (`src/data/sampleWorker.ts`) has the shape an API response would have, so swapping in a real
-  backend means replacing one import.
-- **Pure derivations** (`src/lib/metrics.ts`) — rating average/distribution, experience without
-  double-counting overlapping jobs, verified share, earnings totals, top review tags. Unit tested
-  with Vitest. Formatting (`src/lib/format.ts`) uses Indian digit grouping (₹2,35,170) and
-  k / L / Cr short forms.
-- **Responsive**: two columns at ≥ 960px (sticky sidebar for earnings and tips), one column below;
-  stats go from 4 to 2 columns; checked at 390px with no horizontal scroll.
-- **Accessible**: semantic sections and headings, verification shown as icon + text (not colour
-  alone), keyboard-focusable chart columns with tooltips, a table view of the chart data, and light
-  and dark themes (`prefers-color-scheme`, or `data-theme` on `<html>`).
-- Sample data is anchored to a fixed date (`SAMPLE_AS_OF`) so "2 days ago" and tenure stay stable.
+- **Vite + React 19 + TypeScript**, no UI libraries. Plain CSS with design tokens; light and dark
+  themes (`prefers-color-scheme`, or `data-theme` on `<html>`). Fraunces + Inter from Google Fonts,
+  with system fallbacks.
+- **Progressive disclosure with native `<details>`**, so expand/collapse is keyboard- and
+  screen-reader-friendly with no extra code. The share sheet is a native `<dialog>`.
+- **Typed domain model** (`src/types.ts`) and sample data shaped like an API response
+  (`src/data/sampleWorker.ts`).
+- **Pure helpers** (`src/lib/metrics.ts`, unit tested): experience without double-counting
+  overlapping jobs, grouping roles by workplace, choosing which reviews to feature, rating
+  average, income averages. `src/lib/format.ts` writes durations in words and money in Indian
+  digit grouping (₹39,195).
+- Sample data is anchored to a fixed date (`SAMPLE_AS_OF`) so durations stay stable.
 
 ```
 src/
   types.ts                 domain model
-  data/sampleWorker.ts     realistic sample worker (fictional)
-  lib/format.ts            ₹ / date / duration formatting
-  lib/metrics.ts           pure derived metrics (+ metrics.test.ts)
-  components/              ProfileHeader, StatsStrip, CurrentRole, WorkHistory,
-                           RatingsReviews, TipsRecognition, EarningsSummary,
-                           EarningsChart, VerificationBadge, Stars, Card
-  App.tsx                  layout + viewer toggle
+  data/sampleWorker.ts     sample worker (fictional)
+  lib/                     format.ts, metrics.ts (+ metrics.test.ts)
+  components/              Passport, CurrentRole, WorkHistory, Reputation, Recognition,
+                           PrivateIncome, ShareSheet, Section/More, Verified, Stars, Icons
+  App.tsx                  page order + sticky share bar
 ```
 
 ## Next steps
 
 - API + auth: worker-owned profile, employer accounts that can attest engagements.
 - Verification flows: payroll/UPI matching, employer attestations, peer confirmations.
-- Granular share links (per-section consent, expiry) and a verified income statement export.
+- A read-only public page for the shared link (same sections, income removed).
 - Tie reviews to real tip/payment events to prevent fake reviews.
 - Localisation (Hindi, Kannada, Tamil…) and a print/PDF version of the profile.

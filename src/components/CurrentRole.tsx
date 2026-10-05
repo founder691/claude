@@ -1,42 +1,33 @@
 import type { Engagement } from '../types';
-import { formatDuration, formatMonthYear } from '../lib/format';
+import { formatDuration, formatMonthLong } from '../lib/format';
 import { engagementMonths } from '../lib/metrics';
-import { Card } from './Card';
-import { VerificationBadge } from './VerificationBadge';
+import { More, Section } from './Section';
+import { Verified } from './Verified';
 
-const TYPE_LABEL: Record<Engagement['type'], string> = {
-  'full-time': 'Full-time',
-  'part-time': 'Part-time',
-  gig: 'Gig',
-  contract: 'Contract',
-};
-
-export function CurrentRole({ engagement, now }: { engagement: Engagement; now: Date }) {
+export function CurrentRole({ role, now }: { role: Engagement; now: Date }) {
   return (
-    <Card id="current-role" title="Current role" className="current-role">
-      <div className="current-role__head">
-        <div>
-          <p className="current-role__title">{engagement.role}</p>
-          <p className="current-role__employer">{engagement.employer}</p>
-          <p className="muted">
-            {TYPE_LABEL[engagement.type]} · Since {formatMonthYear(engagement.start)} ·{' '}
-            {formatDuration(engagementMonths(engagement, now))}
-          </p>
-        </div>
-        <span className="status-pill">
-          <span className="status-pill__dot" aria-hidden="true" />
-          Active
-        </span>
+    <Section id="now" title="Working now">
+      <div className="now">
+        <p className="now__role">{role.role}</p>
+        <p className="now__employer">
+          {role.employer} · {role.location}
+        </p>
+        <p className="now__since">
+          Since {formatMonthLong(role.start)} · {formatDuration(engagementMonths(role, now))}
+        </p>
+        <p className="now__summary">{role.summary}</p>
+        <Verified by={role.verifiedBy} />
       </div>
-      <ul className="bullets">
-        {engagement.highlights.map((h) => (
-          <li key={h}>{h}</li>
-        ))}
-      </ul>
-      <div className="current-role__foot">
-        <VerificationBadge source={engagement.verification} detail={engagement.verifiedBy} />
-        {engagement.verifiedBy && <span className="muted small">{engagement.verifiedBy}</span>}
-      </div>
-    </Card>
+      {role.highlights.length > 0 && (
+        <More label="More about this job">
+          <ul className="list">
+            {role.highlights.map((h) => (
+              <li key={h}>{h}</li>
+            ))}
+          </ul>
+          <p className="fine">{role.verifiedHow}.</p>
+        </More>
+      )}
+    </Section>
   );
 }

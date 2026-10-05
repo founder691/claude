@@ -1,30 +1,31 @@
 // Domain model for a Tirelo worker profile.
 // A profile is owned by the worker and travels with them between employers;
-// every claim on it carries the source that vouches for it.
+// every claim on it says who confirmed it.
 
-/** Who vouches for a claim, strongest first. */
+/** How a claim was confirmed, strongest first. */
 export type VerificationSource =
   | 'payroll' // matched against salary / UPI payout records
   | 'employer' // confirmed by an authorised employer account
-  | 'peer' // confirmed by 2+ verified co-workers
-  | 'self'; // self-reported, not yet verified
-
-export type EmploymentType = 'full-time' | 'part-time' | 'gig' | 'contract';
+  | 'peer' // confirmed by verified co-workers
+  | 'self'; // added by the worker, not yet confirmed
 
 export interface Engagement {
   id: string;
   role: string;
   employer: string;
   location: string;
-  type: EmploymentType;
   /** ISO date (YYYY-MM-DD). */
   start: string;
   /** ISO date, or null when this is the current role. */
   end: string | null;
-  verification: VerificationSource;
-  verifiedBy?: string;
+  /** One plain sentence describing the work. */
+  summary: string;
   highlights: string[];
-  skills: string[];
+  verification: VerificationSource;
+  /** Who confirmed it, in plain words — "Kaapi Collective", "3 co-workers". */
+  verifiedBy: string;
+  /** How it was confirmed, in plain words. */
+  verifiedHow: string;
 }
 
 export type ReviewerType = 'customer' | 'manager' | 'coworker';
@@ -34,20 +35,11 @@ export interface Review {
   rating: 1 | 2 | 3 | 4 | 5;
   author: string;
   authorType: ReviewerType;
-  engagementId: string;
+  /** Where the reviewer met the worker. */
+  workplace: string;
   date: string;
   text: string;
   tags: string[];
-}
-
-export interface Tip {
-  id: string;
-  date: string;
-  /** Amount in whole rupees. */
-  amount: number;
-  from: string;
-  engagementId: string;
-  note?: string;
 }
 
 export interface Recognition {
@@ -55,8 +47,7 @@ export interface Recognition {
   title: string;
   issuer: string;
   date: string;
-  kind: 'award' | 'certification' | 'milestone';
-  verification: VerificationSource;
+  kind: 'award' | 'certificate';
 }
 
 export interface EarningsMonth {
@@ -64,33 +55,22 @@ export interface EarningsMonth {
   month: string;
   /** Base pay credited, whole rupees. */
   base: number;
-  /** Tips credited via Tirelo, whole rupees. */
+  /** Tips received through Tirelo, whole rupees. */
   tips: number;
 }
 
-/** Aggregate customer ratings (Tirelo collects many more ratings than written reviews). */
-export interface RatingSummary {
-  counts: Record<1 | 2 | 3 | 4 | 5, number>;
-}
-
 export interface Worker {
-  id: string;
   name: string;
-  pronouns?: string;
-  headline: string;
+  firstName: string;
+  initials: string;
   city: string;
   languages: string[];
-  memberSince: string;
-  profileHandle: string;
   identityVerified: boolean;
-  initials: string;
+  profileUrl: string;
   engagements: Engagement[];
-  ratings: RatingSummary;
+  /** Star ratings from customers, keyed by star. */
+  ratings: Record<1 | 2 | 3 | 4 | 5, number>;
   reviews: Review[];
-  tips: Tip[];
   recognitions: Recognition[];
   earnings: EarningsMonth[];
 }
-
-/** Who is looking at the profile — controls what private data is shown. */
-export type Viewer = 'owner' | 'employer';
